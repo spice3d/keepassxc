@@ -97,6 +97,14 @@ bool WinUtils::nativeEventFilter(const QByteArray& eventType, void* message, qin
     case WM_HOTKEY:
         triggerGlobalShortcut(msg->wParam);
         break;
+    case WM_DISPLAYCHANGE:
+        emit displaySettingsChanged();
+        break;
+    case WM_POWERBROADCAST:
+        if (msg->wParam == PBT_APMRESUMEAUTOMATIC || msg->wParam == PBT_APMRESUMESUSPEND) {
+            emit displaySettingsChanged();
+        }
+        break;
     }
 
     return false;

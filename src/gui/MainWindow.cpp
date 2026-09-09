@@ -543,6 +543,7 @@ MainWindow::MainWindow()
     connect(m_ui->actionAllowScreenCapture, &QAction::toggled, this, &MainWindow::setAllowScreenCapture);
 
     connect(osUtils, &OSUtilsBase::statusbarThemeChanged, this, &MainWindow::updateTrayIcon);
+    connect(osUtils, &OSUtilsBase::displaySettingsChanged, this, &MainWindow::refreshDisplayScale);
 
     // Install event filter for empty-area drag and menubar toggle
     auto* eventFilter = new MainWindowEventFilter(this);
@@ -1494,6 +1495,30 @@ void MainWindow::restoreWindowInformation()
 {
     restoreGeometry(config()->get(Config::GUI_MainWindowGeometry).toByteArray());
     restoreState(config()->get(Config::GUI_MainWindowState).toByteArray());
+}
+
+void MainWindow::refreshDisplayScale()
+{
+    // Work around a Qt/Windows bug where the DPI scale factor becomes stale after a
+    // display is disabled/re-enabled (e.g. resuming from sleep), causing fonts and
+    // widgets to render at the wrong size, most noticeably when maximized. Toggling
+    // the window state forces Qt to recompute geometry and fonts against the
+    // monitor's current DPI, mirroring the known workaround of dragging the window
+    // to another monitor and back. Delay slightly to let Windows finish settling
+    // the display configuration first.
+    QTimer::singleShot(500, this, [this]() {
+        if (!isVisible()) {
+            return;
+        }
+        if (isMaximized()) {
+            showNormal();
+            showMaximized();
+        } else {
+            auto geo = geometry();
+            resize(geo.width() + 1, geo.height());
+            resize(geo.width(), geo.height());
+        }
+    });
 }
 
 bool MainWindow::saveLastDatabases()

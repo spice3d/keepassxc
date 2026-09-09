@@ -597,6 +597,17 @@ else()
     include_directories(SYSTEM ${ZXCVBN_INCLUDE_DIR})
 endif()
 
+if(WIN32)
+    # Place all executables (KeePassXC, keepassxc-cli, keepassxc-proxy) in one
+    # output directory instead of scattered per-target subfolders, so a build
+    # produces a single ready-to-run folder.
+    foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
+        string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} "${CMAKE_BINARY_DIR}/src/${OUTPUTCONFIG}")
+    endforeach()
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/src")
+endif()
+
 # Add KeePassXC sources and tests
 add_subdirectory(src)
 add_subdirectory(share)

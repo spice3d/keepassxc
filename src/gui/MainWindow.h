@@ -156,6 +156,7 @@ private slots:
     void enableMenuAndToolbar();
     void disableMenuAndToolbar();
     void clearSSHAgent();
+    void refreshDisplayScale();
 
 private:
     static const QString BaseWindowTitle;

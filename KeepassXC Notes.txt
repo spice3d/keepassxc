@@ -1,0 +1,5 @@
+Please keep my modifications separate from the main branch. Keep my custom features in a branch called "custom-doug-mods" for my local modifications. Do not make changes directly on main.
+
+-I'd like the app to remember last window position between sessions
+-I would like clicking the X (close window) button to minimize the app to the Windows system tray
+

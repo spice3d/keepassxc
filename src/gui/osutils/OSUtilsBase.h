@@ -101,6 +101,13 @@ signals:
      */
     void statusbarThemeChanged();
 
+    /**
+     * Indicates the display configuration changed (resolution/DPI change,
+     * monitor added/removed, or resume from sleep) and windows may need to
+     * refresh their scale factor.
+     */
+    void displaySettingsChanged();
+
 protected:
     explicit OSUtilsBase(QObject* parent = nullptr);
     ~OSUtilsBase() override;
