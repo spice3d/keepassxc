@@ -1506,8 +1506,16 @@ void MainWindow::refreshDisplayScale()
     // monitor's current DPI, mirroring the known workaround of dragging the window
     // to another monitor and back. Delay slightly to let Windows finish settling
     // the display configuration first.
+    // Skip entirely while the window is hidden/minimized to the system tray: it will pick
+    // up the correct scale factor when it's shown again, and running this workaround right
+    // on top of that show (e.g. if the user reopens the window during the delay below) can
+    // visually duplicate the toolbar.
+    if (!isVisible() || isMinimized() || m_minimizedToSystemTray) {
+        return;
+    }
+
     QTimer::singleShot(500, this, [this]() {
-        if (!isVisible()) {
+        if (!isVisible() || isMinimized() || m_minimizedToSystemTray) {
             return;
         }
         if (isMaximized()) {
