@@ -1334,6 +1334,13 @@ void MainWindow::showEvent(QShowEvent* event)
         restoreWindowInformation();
         m_windowInformationRestored = true;
     }
+
+    // A display/resume event arrived while we were hidden/minimized to the tray; now that
+    // we're actually being shown again, run the deferred DPI-refresh workaround.
+    if (m_displayScaleRefreshPending) {
+        m_displayScaleRefreshPending = false;
+        scheduleDisplayScaleWorkaround();
+    }
 }
 
 void MainWindow::hideEvent(QHideEvent* event)
@@ -1499,6 +1506,21 @@ void MainWindow::restoreWindowInformation()
 
 void MainWindow::refreshDisplayScale()
 {
+    // While the window is hidden/minimized to the system tray, defer the workaround until
+    // it's actually shown again: Windows can settle into the new display configuration while
+    // we're not watching, and applying the fix to a window that isn't on screen yet doesn't
+    // reliably take effect, leaving stale layout behind (observed as a duplicated toolbar)
+    // once the window is finally shown.
+    if (!isVisible() || isMinimized() || m_minimizedToSystemTray) {
+        m_displayScaleRefreshPending = true;
+        return;
+    }
+
+    scheduleDisplayScaleWorkaround();
+}
+
+void MainWindow::scheduleDisplayScaleWorkaround()
+{
     // Work around a Qt/Windows bug where the DPI scale factor becomes stale after a
     // display is disabled/re-enabled (e.g. resuming from sleep), causing fonts and
     // widgets to render at the wrong size, most noticeably when maximized. Toggling
@@ -1506,14 +1528,6 @@ void MainWindow::refreshDisplayScale()
     // monitor's current DPI, mirroring the known workaround of dragging the window
     // to another monitor and back. Delay slightly to let Windows finish settling
     // the display configuration first.
-    // Skip entirely while the window is hidden/minimized to the system tray: it will pick
-    // up the correct scale factor when it's shown again, and running this workaround right
-    // on top of that show (e.g. if the user reopens the window during the delay below) can
-    // visually duplicate the toolbar.
-    if (!isVisible() || isMinimized() || m_minimizedToSystemTray) {
-        return;
-    }
-
     QTimer::singleShot(500, this, [this]() {
         if (!isVisible() || isMinimized() || m_minimizedToSystemTray) {
             return;

@@ -173,6 +173,7 @@ private:
 
     void initViewMenu();
     void initActionCollection();
+    void scheduleDisplayScaleWorkaround();
 
     const QScopedPointer<Ui::MainWindow> m_ui;
     SignalMultiplexer m_actionMultiplexer;
@@ -202,6 +203,7 @@ private:
     bool m_showToolbarSeparator = false;
     bool m_allowScreenCapture = false;
     bool m_minimizedToSystemTray = false;
+    bool m_displayScaleRefreshPending = false;
     qint64 m_lastFocusOutTime = 0;
     qint64 m_lastShowTime = 0;
     QTimer m_updateCheckTimer;
